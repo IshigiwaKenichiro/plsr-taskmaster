@@ -1,6 +1,6 @@
 {
   "name": "plsr-taskmaster",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AIとのタスク対話を行うためのライブラリです。",
   "main": "./dist/index.js",
   "type": "module",

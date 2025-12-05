@@ -26,3 +26,5 @@ npm-debug.log*
 # Local task files (非公開にする)
 tasks/
 tasks/**
+
+.claude/
