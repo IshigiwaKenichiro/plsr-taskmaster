@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build output (publish dist)
+# dist/  ← npm公開では必要なため除外しない
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+
+# Test artifacts
+*.tgz
+
+# Local task files (非公開にする)
+tasks/
+tasks/**

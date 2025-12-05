@@ -1,0 +1,43 @@
+{
+  "name": "plsr-taskmaster",
+  "version": "1.0.0",
+  "description": "AIとのタスク対話を行うためのライブラリです。",
+  "main": "./dist/index.js",
+  "type": "module",
+  "bin": {
+    "plsr-task": "./dist/index.js",
+    "ptm": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc -w"
+  },
+  "keywords": [
+    "ai",
+    "task",
+    "claude"
+  ],
+  "author": "ishigiwa.kenichiro",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IshigiwaKenichiro/plsr-taskmaster"
+  },
+  "homepage": "https://github.com/IshigiwaKenichiro/plsr-taskmaster",
+  "plsr-task": {
+    "task-dir": "tasks"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "commander": "^14.0.2",
+    "date-fns": "^4.1.0",
+    "fs-extra": "^11.3.2",
+    "inquirer": "^13.0.2"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/inquirer": "^9.0.9",
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}
