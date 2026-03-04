@@ -5,6 +5,7 @@ import { cycleCommand } from './commands/cycle.js';
 import { stashCommand } from './commands/stash.js';
 import { doneCommand } from './commands/done.js';
 import { popCommand } from './commands/pop.js';
+import { guideCommand } from './commands/guide.js';
 
 (() => {
     program.name('plsr-task')
@@ -16,6 +17,7 @@ import { popCommand } from './commands/pop.js';
     stashCommand();
     doneCommand();
     popCommand();
+    guideCommand();
 
     program.parse(process.argv);
 })();
