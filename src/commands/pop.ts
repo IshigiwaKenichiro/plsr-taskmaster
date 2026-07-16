@@ -7,7 +7,8 @@ import {
     loadConfig,
     getTaskDir,
     getCurrentTaskNames,
-    getTaskFilesByName
+    getStashedTaskNames,
+    STASH_DIR_NAME
 } from '../utils/taskHelper.js';
 
 /**
@@ -22,18 +23,6 @@ export function popCommand() {
         .action(async (options) => {
             await pop(options.task);
         });
-}
-
-/**
- * stashディレクトリ内のタスク名一覧を取得
- */
-function getStashedTaskNames(stashDir: string): string[] {
-    if (!fs.existsSync(stashDir)) {
-        return [];
-    }
-
-    return fs.readdirSync(stashDir)
-        .filter(f => fs.statSync(path.join(stashDir, f)).isDirectory());
 }
 
 /**
@@ -67,7 +56,7 @@ function getTaskRelatedEntries(taskDir: string, taskName: string): string[] {
 
     for (const entry of entries) {
         // stashディレクトリは除外
-        if (entry === 'stash') continue;
+        if (entry === STASH_DIR_NAME) continue;
 
         // plan.<taskName>.<cycle>.md または review.<taskName>.<cycle>.md
         if ((entry.startsWith(`plan.${taskName}.`) || entry.startsWith(`review.${taskName}.`)) && entry.endsWith('.md')) {
@@ -166,7 +155,7 @@ async function popTask(taskDir: string, stashDir: string, taskName: string): Pro
 async function pop(taskName?: string) {
     const config = loadConfig();
     const taskDir = getTaskDir(config);
-    const stashDir = path.join(taskDir, 'stash');
+    const stashDir = path.join(taskDir, STASH_DIR_NAME);
 
     if (!fs.existsSync(stashDir)) {
         console.log(chalk.yellow('No stashed tasks'));

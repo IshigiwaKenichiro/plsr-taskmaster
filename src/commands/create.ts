@@ -2,11 +2,15 @@ import { program } from 'commander';
 import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
+import { format } from 'date-fns';
 import {
     loadConfig,
     getTaskDir,
-    getCurrentTaskNames
+    getCurrentTaskNames,
+    STASH_DIR_NAME,
+    DONE_DATE_FORMAT
 } from '../utils/taskHelper.js';
+import { loadPlanTemplate, renderTemplate } from '../utils/planTemplate.js';
 
 /**
  * createコマンドを登録
@@ -40,7 +44,7 @@ async function create(taskName: string) {
     const planFileName = `plan.${taskName}.1.md`;
     const createInStash = currentTasks.length > 0;
     const destDir = createInStash
-        ? path.join(taskDir, 'stash', taskName)
+        ? path.join(taskDir, STASH_DIR_NAME, taskName)
         : taskDir;
     const planFilePath = path.join(destDir, planFileName);
 
@@ -49,21 +53,24 @@ async function create(taskName: string) {
         return;
     }
 
-    const content = `# ${taskName}
+    // テンプレート読込（設定不備時は内蔵デフォルトにフォールバックしてcreateを止めない）
+    const templateResult = loadPlanTemplate(config);
+    if (templateResult.warning) {
+        console.log(chalk.yellow(`Warning: ${templateResult.warning}`));
+    }
 
-## 目的
-ここにタスクの目的を記述してください。
-
-## 指示内容
-ここに具体的な指示を記述してください。
-
-## 実行結果
-ここに実行結果を書いて
-`;
+    const content = renderTemplate(templateResult.content, {
+        taskName,
+        date: format(new Date(), DONE_DATE_FORMAT)
+    });
 
     fs.ensureDirSync(destDir);
     fs.writeFileSync(planFilePath, content);
     console.log(chalk.green(`Created: ${planFilePath}`));
+
+    if (templateResult.source === 'file') {
+        console.log(chalk.gray(`Template: ${templateResult.resolvedPath}`));
+    }
 
     if (createInStash) {
         console.log(chalk.cyan(`Current tasks are in progress, so created in stash. Run "pop -t ${taskName}" to activate it.`));

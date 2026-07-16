@@ -7,7 +7,9 @@ import {
     loadConfig,
     getTaskDir,
     getCurrentTaskNames,
-    getTaskFilesByName
+    getTaskFilesByName,
+    DONE_DIR_PREFIX,
+    DONE_DATE_FORMAT
 } from '../utils/taskHelper.js';
 
 /**
@@ -40,8 +42,8 @@ async function done() {
     }
 
     // 今日の日付でdoneディレクトリを作成
-    const today = format(new Date(), 'yyyy-MM-dd');
-    const doneDirName = `done.${today}`;
+    const today = format(new Date(), DONE_DATE_FORMAT);
+    const doneDirName = `${DONE_DIR_PREFIX}${today}`;
     const doneDir = path.join(taskDir, doneDirName);
     fs.ensureDirSync(doneDir);
 
