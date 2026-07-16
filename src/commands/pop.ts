@@ -183,14 +183,8 @@ async function pop(taskName?: string) {
     let selectedTask = taskName;
 
     if (!selectedTask) {
-        // 1件の場合はリスト入力せずにそのままpop
-        if (stashedTasks.length === 1) {
-            selectedTask = stashedTasks[0];
-            console.log(chalk.cyan(`Auto-selecting single stashed task: ${selectedTask}`));
-        } else {
-            // 複数件の場合はinquirerでリスト選択
-            selectedTask = await selectTask(stashedTasks);
-        }
+        // 1件でも誤popを防ぐため、必ずリスト選択を挟む
+        selectedTask = await selectTask(stashedTasks);
     }
 
     // 指定されたタスクがstashに存在するか確認
