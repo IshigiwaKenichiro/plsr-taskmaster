@@ -42,7 +42,8 @@ function getStashedTaskNames(stashDir: string): string[] {
 async function selectTask(taskNames: string[]): Promise<string> {
     const { selectedTask } = await inq.prompt([{
         name: 'selectedTask',
-        type: 'list',
+        // inquirer v10以降は 'list' が廃止され 'select' に改名された（未知タイプはinputにフォールバックする）
+        type: 'select',
         message: 'Select task to pop:',
         choices: taskNames
     }]);
