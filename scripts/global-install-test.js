@@ -144,21 +144,39 @@ async function main() {
         recordTest('ptm cycle', cycleResult.success && reviewFileExists,
             reviewFileExists ? '' : 'review.sample-task.1.md not created');
 
-        // 5.3 ptm stash
+        // 5.3 ptm list --json（cycle直後: active 1件 / next: review の状態を検証）
+        log.info('Testing: ptm list --json');
+        const listResult = run('ptm list --json', { cwd: TEMP_DIR, silent: true });
+        let listOk = false;
+        let listMessage = 'invalid JSON output';
+        if (listResult.success) {
+            try {
+                const parsed = JSON.parse(listResult.output);
+                listOk = parsed.active.length === 1
+                    && parsed.active[0].taskName === 'sample-task'
+                    && parsed.active[0].nextAction === 'review';
+                listMessage = listOk ? '' : `unexpected result: ${listResult.output}`;
+            } catch {
+                // listOk=false のまま（JSONパース失敗）
+            }
+        }
+        recordTest('ptm list --json', listOk, listMessage);
+
+        // 5.4 ptm stash
         log.info('Testing: ptm stash');
         const stashResult = run('ptm stash', { cwd: TEMP_DIR, silent: true });
         const stashDirExists = fs.existsSync(path.join(TEMP_DIR, 'tasks', 'stash', 'sample-task'));
         recordTest('ptm stash', stashResult.success && stashDirExists,
             stashDirExists ? '' : 'stash/sample-task not created');
 
-        // 5.4 ptm pop
-        log.info('Testing: ptm pop');
-        const popResult = run('ptm pop', { cwd: TEMP_DIR, silent: true });
+        // 5.5 ptm pop（タスク名未指定はリスト選択プロンプトが出るため、非対話実行では-tで指定する）
+        log.info('Testing: ptm pop -t sample-task');
+        const popResult = run('ptm pop -t sample-task', { cwd: TEMP_DIR, silent: true });
         const planFileRestored = fs.existsSync(path.join(TEMP_DIR, 'tasks', 'plan.sample-task.1.md'));
         recordTest('ptm pop', popResult.success && planFileRestored,
             planFileRestored ? '' : 'plan.sample-task.1.md not restored');
 
-        // 5.5 ptm done
+        // 5.6 ptm done
         log.info('Testing: ptm done');
         const doneResult = run('ptm done', { cwd: TEMP_DIR, silent: true });
         // doneディレクトリが作成されているか確認

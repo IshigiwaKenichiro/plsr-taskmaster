@@ -7,7 +7,8 @@ import {
     loadConfig,
     getTaskDir,
     getCurrentTaskNames,
-    getTaskFilesByName
+    getStashedTaskNames,
+    STASH_DIR_NAME
 } from '../utils/taskHelper.js';
 
 /**
@@ -25,24 +26,13 @@ export function popCommand() {
 }
 
 /**
- * stashディレクトリ内のタスク名一覧を取得
- */
-function getStashedTaskNames(stashDir: string): string[] {
-    if (!fs.existsSync(stashDir)) {
-        return [];
-    }
-
-    return fs.readdirSync(stashDir)
-        .filter(f => fs.statSync(path.join(stashDir, f)).isDirectory());
-}
-
-/**
  * inquirerでタスクを選択
  */
 async function selectTask(taskNames: string[]): Promise<string> {
     const { selectedTask } = await inq.prompt([{
         name: 'selectedTask',
-        type: 'list',
+        // inquirer v10以降は 'list' が廃止され 'select' に改名された（未知タイプはinputにフォールバックする）
+        type: 'select',
         message: 'Select task to pop:',
         choices: taskNames
     }]);
@@ -66,7 +56,7 @@ function getTaskRelatedEntries(taskDir: string, taskName: string): string[] {
 
     for (const entry of entries) {
         // stashディレクトリは除外
-        if (entry === 'stash') continue;
+        if (entry === STASH_DIR_NAME) continue;
 
         // plan.<taskName>.<cycle>.md または review.<taskName>.<cycle>.md
         if ((entry.startsWith(`plan.${taskName}.`) || entry.startsWith(`review.${taskName}.`)) && entry.endsWith('.md')) {
@@ -165,7 +155,7 @@ async function popTask(taskDir: string, stashDir: string, taskName: string): Pro
 async function pop(taskName?: string) {
     const config = loadConfig();
     const taskDir = getTaskDir(config);
-    const stashDir = path.join(taskDir, 'stash');
+    const stashDir = path.join(taskDir, STASH_DIR_NAME);
 
     if (!fs.existsSync(stashDir)) {
         console.log(chalk.yellow('No stashed tasks'));
@@ -183,14 +173,8 @@ async function pop(taskName?: string) {
     let selectedTask = taskName;
 
     if (!selectedTask) {
-        // 1件の場合はリスト入力せずにそのままpop
-        if (stashedTasks.length === 1) {
-            selectedTask = stashedTasks[0];
-            console.log(chalk.cyan(`Auto-selecting single stashed task: ${selectedTask}`));
-        } else {
-            // 複数件の場合はinquirerでリスト選択
-            selectedTask = await selectTask(stashedTasks);
-        }
+        // 1件でも誤popを防ぐため、必ずリスト選択を挟む
+        selectedTask = await selectTask(stashedTasks);
     }
 
     // 指定されたタスクがstashに存在するか確認

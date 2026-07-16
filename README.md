@@ -1,6 +1,10 @@
 # Pulsar Task Master (plsr-taskmaster)
 AIとのタスク対話を行うためのライブラリです。
 
+詳細なドキュメント:
+- [コマンドリファレンス](docs/commands.md)
+- [設定ガイド](docs/configuration.md)
+
 # Install
 
 ## グローバルインストール（推奨）
@@ -19,9 +23,22 @@ npm i plsr-taskmaster
 ```json
 ...
     "plsr-task" : {
-        "task-dir" : "tasks"
+        "task-dir" : "tasks",
+        "template" : "templates/plan-template.md"
     }
 ```
+
+## planテンプレートのカスタマイズ
+`template`にテンプレートファイルのパス（package.jsonからの相対または絶対）を指定すると、`create`時のplan雛形を差し替えられます。未指定の場合は内蔵デフォルトが使われます。
+
+テンプレート内では以下のプレースホルダが使えます。
+
+| プレースホルダ | 置換内容 |
+|---------------|---------|
+| `{{taskName}}` | タスク名 |
+| `{{date}}` | 作成日（yyyy-MM-dd） |
+
+未知のプレースホルダはそのまま残ります。テンプレートファイルが存在しない・読めない・空の場合は警告を表示し、内蔵デフォルトにフォールバックします（createは失敗しません）。
 
 ## コマンド一覧
 
@@ -38,6 +55,13 @@ npx ptm create <タスク名>
 
 # タスクのplan/reviewサイクルを作成する
 npx ptm cycle
+
+# タスク一覧とサイクル状態を表示する（ls / status でも可）
+npx ptm list
+# AIエージェント向けJSON出力
+npx ptm list --json
+# doneアーカイブのタスク名まで表示
+npx ptm list --all
 
 # 実行中タスクをわきにどける
 npx ptm stash

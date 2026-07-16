@@ -6,7 +6,8 @@ import {
     loadConfig,
     getTaskDir,
     getCurrentTaskNames,
-    getTaskFilesByName
+    getTaskFilesByName,
+    STASH_DIR_NAME
 } from '../utils/taskHelper.js';
 
 /**
@@ -38,7 +39,7 @@ async function stash() {
         return;
     }
 
-    const stashDir = path.join(taskDir, 'stash');
+    const stashDir = path.join(taskDir, STASH_DIR_NAME);
     fs.ensureDirSync(stashDir);
 
     for (const taskName of currentTasks) {
