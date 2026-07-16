@@ -4,6 +4,9 @@
   "description": "AIとのタスク対話を行うためのライブラリです。",
   "main": "./dist/index.js",
   "type": "module",
+  "files": [
+    "dist"
+  ],
   "bin": {
     "plsr-task": "./dist/index.js",
     "ptm": "./dist/index.js"
