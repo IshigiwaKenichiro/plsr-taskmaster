@@ -11,6 +11,7 @@ import {
     DONE_DATE_FORMAT
 } from '../utils/taskHelper.js';
 import { loadPlanTemplate, renderTemplate } from '../utils/planTemplate.js';
+import { copyToClipboard } from '../utils/clipboard.js';
 
 /**
  * createコマンドを登録
@@ -67,6 +68,14 @@ async function create(taskName: string) {
     fs.ensureDirSync(destDir);
     fs.writeFileSync(planFilePath, content);
     console.log(chalk.green(`Created: ${planFilePath}`));
+
+    // 作成したファイルをそのままAIへ渡せるよう、フルパスをクリップボードへ入れる
+    const clipResult = await copyToClipboard(planFilePath);
+    if (clipResult.success) {
+        console.log(chalk.gray('Copied to clipboard'));
+    } else {
+        console.log(chalk.yellow(`Warning: ${clipResult.warning}`));
+    }
 
     if (templateResult.source === 'file') {
         console.log(chalk.gray(`Template: ${templateResult.resolvedPath}`));

@@ -9,6 +9,7 @@ import {
     extractTaskName,
     extractCycleNumber
 } from '../utils/taskHelper.js';
+import { copyToClipboard } from '../utils/clipboard.js';
 
 /**
  * cycleコマンドを登録
@@ -155,5 +156,13 @@ async function cycle() {
     } else {
         fs.writeFileSync(filePath, indicates.join('\n'));
         console.log(chalk.green(`Created: ${filePath}`));
+    }
+
+    // 既存でも新規でも「次に扱うファイル」は同じなので、どちらの場合もコピーする
+    const clipResult = await copyToClipboard(filePath);
+    if (clipResult.success) {
+        console.log(chalk.gray('Copied to clipboard'));
+    } else {
+        console.log(chalk.yellow(`Warning: ${clipResult.warning}`));
     }
 }

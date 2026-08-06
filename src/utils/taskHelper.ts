@@ -141,6 +141,27 @@ export function getTaskFilesByName(taskDir: string, taskName: string): TaskFileI
     return getTaskFiles(taskDir).filter(f => f.taskName === taskName);
 }
 
+/**
+ * 特定タスクの最新タスクファイルを取得
+ *
+ * mtimeではなくサイクル番号で判定する。
+ * moveSyncや外部エディタでmtimeは容易に揺れるため、命名規則から決めた方が結果が安定する。
+ * 同一サイクル番号ならreviewを優先する（cycle.tsの規則上、review.Nはplan.Nの後に作られるため）。
+ */
+export function getLatestTaskFile(taskDir: string, taskName: string): TaskFileInfo | null {
+    const files = getTaskFilesByName(taskDir, taskName);
+    if (files.length === 0) {
+        return null;
+    }
+
+    return files.reduce((latest, file) => {
+        if (file.cycle !== latest.cycle) {
+            return file.cycle > latest.cycle ? file : latest;
+        }
+        return file.type === 'review' ? file : latest;
+    });
+}
+
 /** 次に必要なアクション: run=plan実行待ち, review=レビュー所見待ち */
 export type NextAction = 'run' | 'review';
 
