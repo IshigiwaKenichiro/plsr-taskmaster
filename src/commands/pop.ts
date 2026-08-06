@@ -8,8 +8,10 @@ import {
     getTaskDir,
     getCurrentTaskNames,
     getStashedTaskNames,
+    getLatestTaskFile,
     STASH_DIR_NAME
 } from '../utils/taskHelper.js';
+import { copyToClipboard } from '../utils/clipboard.js';
 
 /**
  * popコマンドを登録
@@ -121,13 +123,15 @@ async function stashCurrentTasks(taskDir: string, stashDir: string, excludeTaskN
 /**
  * 指定タスクをpop（stashから復元）
  * 全エントリを移動（ファイル、サブディレクトリ含む）
+ *
+ * @returns 復元に成功したかどうか（呼び出し側でクリップボードコピーの要否を判定するため）
  */
-async function popTask(taskDir: string, stashDir: string, taskName: string): Promise<void> {
+async function popTask(taskDir: string, stashDir: string, taskName: string): Promise<boolean> {
     const taskStashDir = path.join(stashDir, taskName);
 
     if (!fs.existsSync(taskStashDir)) {
         console.log(chalk.red(`Task "${taskName}" not found in stash`));
-        return;
+        return false;
     }
 
     // 全エントリを取得（ファイル、サブディレクトリ含む）
@@ -135,7 +139,7 @@ async function popTask(taskDir: string, stashDir: string, taskName: string): Pro
 
     if (entries.length === 0) {
         console.log(chalk.red(`No entries found in stash/${taskName}/`));
-        return;
+        return false;
     }
 
     for (const entry of entries) {
@@ -150,6 +154,8 @@ async function popTask(taskDir: string, stashDir: string, taskName: string): Pro
     // 空になったstashディレクトリを削除
     fs.removeSync(taskStashDir);
     console.log(chalk.green(`\nPopped task: ${taskName}`));
+
+    return true;
 }
 
 async function pop(taskName?: string) {
@@ -189,5 +195,21 @@ async function pop(taskName?: string) {
     await stashCurrentTasks(taskDir, stashDir, selectedTask);
 
     // 選択されたタスクをpop
-    await popTask(taskDir, stashDir, selectedTask);
+    const popped = await popTask(taskDir, stashDir, selectedTask);
+    if (!popped) {
+        return;
+    }
+
+    // popは新規ファイルを作らないため、復元したタスクの最新ファイルをコピー対象とする
+    const latestFile = getLatestTaskFile(taskDir, selectedTask);
+    if (!latestFile) {
+        return;
+    }
+
+    const clipResult = await copyToClipboard(latestFile.filePath);
+    if (clipResult.success) {
+        console.log(chalk.gray(`Copied to clipboard: ${latestFile.filePath}`));
+    } else {
+        console.log(chalk.yellow(`Warning: ${clipResult.warning}`));
+    }
 }
