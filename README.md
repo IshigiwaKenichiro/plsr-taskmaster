@@ -4,6 +4,7 @@ AIとのタスク対話を行うためのライブラリです。
 詳細なドキュメント:
 - [コマンドリファレンス](docs/commands.md)
 - [設定ガイド](docs/configuration.md)
+- [変更履歴](CHANGELOG.md)
 
 # Install
 
